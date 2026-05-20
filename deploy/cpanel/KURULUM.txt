@@ -1,0 +1,61 @@
+================================================================================
+  KAYHANPR — cPanel .htaccess ve index.php (SSH yok)
+================================================================================
+
+SUNUCU KLASOR YAPISI (dogru):
+-----------------------------
+/home/KULLANICI/
+    kayhanpr/          <-- Laravel (app, vendor, .env, storage...)
+        .htaccess      <-- deploy/cpanel/kayhanpr/.htaccess BURAYA
+    public_html/       <-- Site adresi buradan acilir
+        index.php      <-- deploy/cpanel/public_html/index.php BURAYA
+        .htaccess      <-- deploy/cpanel/public_html/.htaccess BURAYA
+        kayhan/        <-- public/kayhan klasorunun TAMAMI
+        yuklemeler/    <-- public/yuklemeler (varsa)
+        site_resimleri/ (varsa)
+
+
+HANGI .htaccess NEREYE?
+-----------------------
+
+1) public_html/.htaccess
+   Dosya: deploy/cpanel/public_html/.htaccess
+   Islem: public_html icine yukle, adi .htaccess olsun
+   NOT: "RewriteRule public/$1" KULLANMAYIN — Index of / hatasi verir
+
+2) kayhanpr/.htaccess
+   Dosya: deploy/cpanel/kayhanpr/.htaccess
+   Islem: kayhanpr ana klasorune yukle (public_html DISINDA)
+   Amac: Laravel dosyalarina tarayicidan erisimi engeller
+
+3) ANA DIZINDE (public_html ustunde) public/ yonlendiren .htaccess
+   KULLANMAYIN — SILIN veya yuklemeyin
+
+
+public_html/index.php
+---------------------
+Dosya: deploy/cpanel/public_html/index.php
+Laravel yolu: ../kayhanpr (public_html ile ayni seviye)
+
+Eger Laravel klasor adi farkliysa index.php icinde $laravelRoot satirini duzeltin:
+   $laravelRoot = dirname(__DIR__) . '/KLASOR_ADI';
+
+
+YUKLEME SIRASI
+--------------
+1) kayhanpr.zip -> /home/KULLANICI/kayhanpr/ (vendor dahil)
+2) kayhanpr/.htaccess kopyala
+3) public/ ICINDEKILERI -> public_html/ (index.php HARIC — deploy dosyasini kullan)
+4) public_html/index.php ve public_html/.htaccess (deploy/cpanel'den)
+5) kayhanpr/.env olustur (DB bilgileri, APP_URL=https://domain.com)
+6) storage ve bootstrap/cache izinleri 755 veya 775
+7) phpMyAdmin ile veritabani import
+
+
+YANLIS (yapmayin)
+-----------------
+- Tum projeyi public_html'e atip "RewriteRule ^(.*)$ public/$1" kullanmak
+- .htaccess.txt olarak birakmak
+- vendor klasorunu yuklememek
+
+================================================================================
